@@ -74,6 +74,27 @@ func (c *Client) Mkdir(path string) (string, error) {
 	return dir, nil
 }
 
+func (c *Client) Chmod(perm int, path string) (string, error){
+  pconn, err := c.getIdleConn()
+
+  if err != nil {
+    return "", err
+  }
+
+  defer c.returnConn(pconn)
+  code, msg, err := pconn.sendCommand("CHMOD %d %s", perm, path)
+
+  if err != nil {
+    return "", err
+  }
+
+  if code != 200 {
+    return "", ftpError{code: code, msg: msg}
+  }
+
+  return msg, nil
+}
+
 // Rmdir removes directory "path".
 func (c *Client) Rmdir(path string) error {
 	pconn, err := c.getIdleConn()
